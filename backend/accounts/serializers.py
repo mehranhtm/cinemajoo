@@ -5,19 +5,17 @@ from .models import UserProfile
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
-    confirm_password = serializers.CharField(write_only=True)
     
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'confirm_password', 'first_name', 'last_name']
-    
-    def validate(self, attrs):
-        if attrs['password'] != attrs['confirm_password']:
-            raise serializers.ValidationError("Passwords don't match")
-        return attrs
+        fields = ['username', 'password']
     
     def create(self, validated_data):
-        validated_data.pop('confirm_password')
+        # Set default values for required Django User fields
+        validated_data['email'] = f"{validated_data['username']}@cinemajoo.local"
+        validated_data['first_name'] = ""
+        validated_data['last_name'] = ""
+        
         user = User.objects.create_user(**validated_data)
         return user
 
@@ -53,6 +51,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'date_joined']
+        fields = ['id', 'username', 'date_joined']
 
 
