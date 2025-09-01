@@ -1,0 +1,14 @@
+@font-face {
+    font-family: 'Diavlo Medium Regular';
+    src: url('../fonts/Diavlo_MEDIUM_II_37.woff') format('woff');
+    font-family: 'EPISODE I';
+    src: url('../fonts/episode-1-cufonfonts-webfont/EPISODE1.woff') format('woff');
+}
+
+body {
+    font-family: 'Diavlo Medium Regular';
+}
+
+h1 {
+    font-family: 'EPISODE I';
+}
