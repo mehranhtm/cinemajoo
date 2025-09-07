@@ -130,7 +130,7 @@ export default {
           return;
         }
         localStorage.setItem("user", JSON.stringify(this.user.username));
-        this.$router.push("/profile");
+        this.$router.replace("/profile");
       } catch (error) {
         console.error("Error:", error);
         this.errorMessage = "Server not responding. Try again later.";
