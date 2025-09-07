@@ -38,6 +38,7 @@ export default {
     };
   },
   mounted() {
+    document.title = "Cinemajoo - Profile ";
     this.user = JSON.parse(localStorage.getItem("user"));
   },
 };
