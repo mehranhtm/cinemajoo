@@ -122,7 +122,8 @@ export default {
           this.errorMessage = errorData?.detail || "Login failed.";
           return;
         }
-        this.$router.push("/profile");
+        localStorage.setItem("user", JSON.stringify(this.user.username));
+        this.$router.replace("/profile");
       } catch (error) {
         console.error("Error:", error);
         this.errorMessage = "Server not responding. Try again later.";
