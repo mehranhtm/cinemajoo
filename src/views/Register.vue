@@ -44,6 +44,14 @@
             <v-alert v-if="errorMessage" type="error" dense class="mt-2">
               {{ errorMessage }}
             </v-alert>
+            <v-alert
+              v-if="$route.query.message === 'auth'"
+              type="warning"
+              dense
+              class="mt-2"
+            >
+              PLEASE REGISTER OR LOGIN FIRST
+            </v-alert>
             <v-btn
               class="btn-signin mt-4"
               @click="handleRegister"
