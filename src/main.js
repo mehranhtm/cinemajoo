@@ -12,6 +12,19 @@ const router = new VueRouter({
   routes
 });
 
+router.beforeEach((to, from, next) => {
+  const user = localStorage.getItem('user')
+  const publicPages = ['/', '/login']
+  const authRequired = !publicPages.includes(to.path)
+  if (authRequired && !user) {
+    return next('/?message=auth')
+  }
+  if ((to.path === '/' || to.path === '/login') && user) {
+    return next('/profile')
+  }
+  next()
+})
+
 Vue.config.productionTip = false
 
 new Vue({
