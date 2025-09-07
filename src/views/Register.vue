@@ -51,7 +51,14 @@
             >
               Register
             </v-btn>
-            <p class="white--text mt-4">If you have an account, <router-link class="text-decoration-none text-primary font-weight-bold" to="/login">login</router-link></p>
+            <p class="white--text mt-4" style="letter-spacing: 3px">
+              IF YOU HAVE AN ACCOUNT,
+              <router-link
+                class="text-decoration-none text-primary font-weight-bold"
+                to="/login"
+                >LOGIN</router-link
+              >
+            </p>
           </v-form>
         </v-card-text>
       </div>
@@ -114,10 +121,8 @@ export default {
           this.errorMessage = errorData?.detail || "Registration failed.";
           return;
         }
-        const data = await response.json();
-        console.log("User registered:", data);
-        // localStorage.setItem("user", JSON.stringify(data));
-        this.$router.push("/mainpage");
+        localStorage.setItem("user", JSON.stringify(this.user.username));
+        this.$router.push("/profile");
       } catch (error) {
         console.error("Error:", error);
         this.errorMessage = "Server not responding. Try again later.";
