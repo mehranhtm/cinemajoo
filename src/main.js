@@ -17,10 +17,10 @@ router.beforeEach((to, from, next) => {
   const publicPages = ['/', '/login']
   const authRequired = !publicPages.includes(to.path)
   if (authRequired && !user) {
-    return next('/?message=auth')
+    return next({ path: '/', query: { message: 'auth' }, replace: true })
   }
   if ((to.path === '/' || to.path === '/login') && user) {
-    return next('/profile')
+    return next({ path: '/profile', replace: true })
   }
   next()
 })
