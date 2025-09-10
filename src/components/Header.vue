@@ -12,18 +12,61 @@
       </div>
     </div>
     <v-spacer></v-spacer>
-    <v-text-field
-      v-if="showSearch"
-      v-model="searchQuery"
-      placeholder="Search for a movie..."
-      color="white"
-      dark
-      class="search-field"
-      hide-details
-      outlined
-      @blur="hideSearch"
-      ref="searchInput"
-    ></v-text-field>
+    <div class="search-container">
+      <v-text-field
+        v-show="showSearch"
+        v-model="searchQuery"
+        placeholder="Search for a movie..."
+        color="white"
+        dark
+        class="search-field"
+        hide-details
+        outlined
+        @blur="hideSearch"
+        ref="searchInput"
+        @input="searchMovies"
+        @focus="handleShowDropdown"
+      ></v-text-field>
+      <v-card
+        v-if="showDropdown && searchQuery !== ''"
+        class="search-dropdown"
+        elevation="8"
+      >
+        <v-list v-if="searchResults.length > 0">
+          <v-list-item
+            v-for="movie in searchResults"
+            :key="movie.id"
+            @click="goToMovie(movie)"
+            class="search-result-item"
+          >
+            <v-list-item-avatar>
+              <v-img
+                :src="
+                  movie.poster_url
+                    ? movie.poster_url
+                    : 'https://via.placeholder.com/92x138?text=No+Image'
+                "
+              />
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title>{{ movie.title }}</v-list-item-title>
+              <v-list-item-subtitle>
+                {{ movie.release_date }}
+              </v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+        <v-list v-else-if="searchQuery && searchResults.length === 0">
+          <v-list-item>
+            <v-list-item-content>
+              <v-list-item-title class="white--text"
+                >No results found
+              </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-card>
+    </div>
     <v-btn icon @click="toggleSearch" class="search-btn">
       <v-icon color="white">mdi-magnify</v-icon>
     </v-btn>
@@ -40,6 +83,9 @@ export default {
     return {
       showSearch: false,
       searchQuery: "",
+      searchResults: [],
+      showDropdown: false,
+      searchTimeout: null,
     };
   },
   methods: {
@@ -49,16 +95,61 @@ export default {
         this.$nextTick(() => {
           this.$refs.searchInput.focus();
         });
+      } else {
+        this.showDropdown = false;
+        this.searchQuery = "";
+        this.searchResults = [];
       }
     },
     hideSearch() {
       setTimeout(() => {
         this.showSearch = false;
+        this.showDropdown = false;
+        this.searchQuery = "";
+        this.searchResults = [];
       }, 200);
+    },
+    handleShowDropdown() {
+      if (this.searchQuery.trim()) {
+        this.showDropdown = true;
+      }
     },
     handleLogout() {
       localStorage.removeItem("user");
       this.$router.push("/");
+    },
+    async searchMovies() {
+      if (this.searchTimeout) {
+        clearTimeout(this.searchTimeout);
+      }
+      if (!this.searchQuery.trim()) {
+        this.searchResults = [];
+        this.showDropdown = false;
+        return;
+      }
+      this.showDropdown = true;
+      this.searchTimeout = setTimeout(async () => {
+        try {
+          const response = await fetch(
+            `http://localhost:8000/api/movies/search?q=${encodeURIComponent(
+              this.searchQuery
+            )}`
+          );
+          const data = await response.json();
+          // console.log("Search results:", data);
+          this.searchResults = data;
+        } catch (err) {
+          console.error("Error fetching search results:", err);
+          this.searchResults = [];
+        }
+      }, 5);
+    },
+    goToMovie(movie) {
+      console.log("Selected movie:", movie);
+      this.showDropdown = false;
+      this.searchQuery = "";
+      this.searchResults = [];
+      this.showSearch = false;
     },
   },
 };
@@ -99,5 +190,77 @@ export default {
 .logout-btn {
   color: white !important;
   width: 100%;
+}
+
+.search-container {
+  position: relative;
+  margin-right: 8px;
+}
+
+.search-field {
+  min-width: 300px;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  color: white !important;
+}
+
+.search-dropdown.v-card {
+  background-color: #1a0c33 !important;
+}
+
+.search-dropdown .v-list {
+  background-color: #1a0c33 !important;
+}
+
+.search-result-item {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  background-color: transparent !important;
+}
+
+.search-result-item:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.search-result-item .v-list-item__title {
+  color: white !important;
+}
+
+.search-result-item .v-list-item__subtitle {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.search-dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+.search-dropdown::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+.search-dropdown::-webkit-scrollbar-thumb {
+  background: #2c1750;
+  border-radius: 4px;
+  border: 1px solid #2c1750;
+}
+
+.search-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #2c1750;
+}
+
+.search-dropdown {
+  scrollbar-width: thin;
+  scrollbar-color: #2c1750 #1a1a1a;
 }
 </style>
