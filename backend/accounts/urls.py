@@ -7,7 +7,10 @@ from .views import (
     UserProfileView,
     UserLogoutView,
     get_user_info,
-    check_username_availability
+    check_username_availability,
+    MovieSearchView,
+    MovieDetailView,
+    MarkWatchedView
 )
 
 urlpatterns = [
@@ -19,6 +22,9 @@ urlpatterns = [
     path('profile/', UserProfileView.as_view(), name='user-profile'),
     path('user-info/', get_user_info, name='user-info'),
     path('check-username/', check_username_availability, name='check-username'),
+    path('movies/search/', MovieSearchView.as_view(), name='movies-search'),
+    path('movies/<int:movie_id>/', MovieDetailView.as_view(), name='movie-detail'),
+    path('movies/mark-watched/', MarkWatchedView.as_view(), name='movies-mark-watched'),
 ]
 
 
