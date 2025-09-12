@@ -13,6 +13,6 @@ export default {};
 <style>
 #app {
   background-color: #1a0c33 !important;
-  /* min-height: 100vh; */
+  /* max-height: 100vh; */
 }
 </style>

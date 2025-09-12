@@ -26,7 +26,8 @@
         ref="searchInput"
         @input="searchMovies"
         @focus="handleShowDropdown"
-      ></v-text-field>
+      >
+      </v-text-field>
       <v-card
         v-if="showDropdown && searchQuery !== ''"
         class="search-dropdown"
@@ -53,6 +54,13 @@
               <v-list-item-subtitle>
                 {{ movie.release_date }}
               </v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+        <v-list v-else-if="isLoading">
+          <v-list-item>
+            <v-list-item-content class="d-flex align-center">
+              <v-progress-circular indeterminate size="22" color="white" class="mr-2" />
             </v-list-item-content>
           </v-list-item>
         </v-list>
@@ -86,6 +94,7 @@ export default {
       searchResults: [],
       showDropdown: false,
       searchTimeout: null,
+      isLoading: false,
     };
   },
   methods: {
@@ -122,12 +131,15 @@ export default {
       if (this.searchTimeout) {
         clearTimeout(this.searchTimeout);
       }
+      this.isLoading = true;
       if (!this.searchQuery.trim()) {
         this.searchResults = [];
         this.showDropdown = false;
+        this.isLoading = false;
         return;
       }
       this.showDropdown = true;
+      // this.isLoading = true;
       this.searchTimeout = setTimeout(async () => {
         try {
           const response = await fetch(
@@ -141,11 +153,13 @@ export default {
         } catch (err) {
           console.error("Error fetching search results:", err);
           this.searchResults = [];
+        } finally {
+          this.isLoading = false;
         }
       }, 5);
     },
     goToMovie(movie) {
-      console.log("Selected movie:", movie);
+      this.$router.push(`/movie/${movie.id}`);
       this.showDropdown = false;
       this.searchQuery = "";
       this.searchResults = [];
@@ -158,6 +172,8 @@ export default {
 <style scoped>
 .header {
   height: 85px !important;
+  position: relative;
+  z-index: 4000;
 }
 
 .header img {
@@ -206,7 +222,7 @@ export default {
   top: 100%;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 5000;
   max-height: 400px;
   overflow-y: auto;
   border-radius: 4px;

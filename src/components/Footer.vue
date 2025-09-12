@@ -76,9 +76,12 @@ export default {
 </script>
 
 <style scoped>
-.footer {
-  margin-top: auto;
-}
+/* .footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+} */
 
 .footer-logo {
   width: 30px;
