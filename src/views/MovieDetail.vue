@@ -13,7 +13,11 @@
         indeterminate
       ></v-progress-circular>
     </div>
-    <v-container v-else class="d-flex flex-row text-break" style="gap: 15px">
+    <v-container
+      v-else
+      class="d-flex flex-row text-break"
+      style="gap: 15px; max-width: 91%"
+    >
       <div class="left d-flex flex-column">
         <div class="poster">
           <img :src="posterUrl" alt="Poster" />
@@ -94,28 +98,58 @@
           </v-chip>
         </div>
       </div>
-      <div class="right d-flex flex-column" style="width: 100%">
+      <div class="right d-flex flex-column" style="width: 50%">
         <div
           class="d-flex flex-row justify-center align-center"
           style="gap: 35px"
           v-if="hasMovie"
         >
-          <p class="white--text text-center">
-            Vote Average <br />
-            {{ movie.vote_average }}
-          </p>
-          <p class="white--text text-center">
-            Vote <br />
-            {{ movie.vote_average }}
-          </p>
-          <p class="white--text text-center">
-            Vote <br />
-            {{ movie.vote_average }}
-          </p>
+          <div class="d-flex flex-column align-center mb-4" style="gap: 8px">
+            <v-img
+              src="../assets/images/tmdb.svg"
+              alt="TMDB"
+              height="40"
+              width="40"
+              style="border-radius: 100%"
+            ></v-img>
+            <p class="white--text text-center ma-0">{{ movie.vote_average.toFixed(1) }}</p>
+          </div>
+          <div class="d-flex flex-column align-center mb-4" style="gap: 8px">
+            <v-img
+              src="../assets/images/imdb-logo.svg"
+              alt="IMDB"
+              width="40"
+              height="40"
+              style="border-radius: 100%"
+            ></v-img>
+            <p class="white--text text-center ma-0">
+              {{ movie.imdbRating || "N/A" }}
+            </p>
+          </div>
+          <div class="d-flex flex-column align-center mb-4" style="gap: 8px">
+            <v-img
+              src="../assets/images/Rotten_Tomatoes.svg.png"
+              alt="Rotten Tomatoes"
+              width="40"
+              height="40"
+              style="border-radius: 100%"
+            ></v-img>
+            <p class="white--text text-center ma-0">
+              {{ movie.rottenRating || "N/A" }}
+            </p>
+          </div>
         </div>
         <v-divider color="#561a7d"></v-divider>
-        <div class="d-flex flex-column align-center mt-4">
-          <span class="white--text mr-2 text-center">Your rating</span>
+        <div v-if="!isWatched" class="text-center pa-4">
+          <span class="white--text mr-2"
+            >You haven't watched this movie yet.</span
+          >
+        </div>
+        <div
+          v-if="isWatched"
+          class="d-flex flex-column align-center mt-4 text-center"
+        >
+          <span class="white--text mr-2">Your rating</span>
           <v-rating
             v-model="userRating"
             :length="10"
@@ -182,10 +216,18 @@ export default {
     "$route.params.id"(newId, oldId) {
       if (newId !== oldId) {
         this.movie = {};
-        this.userRating = 0;
         this.fetchMovie();
         window.scrollTo(0, 0);
       }
+    },
+    userRating(newValue) {
+      const username = JSON.parse(localStorage.getItem("user"));
+      if (!username) return;
+      const ratings = JSON.parse(localStorage.getItem("ratings")) || {};
+      const movieId = this.$route.params.id;
+      if (!ratings[username]) ratings[username] = {};
+      ratings[username][movieId] = newValue;
+      localStorage.setItem("ratings", JSON.stringify(ratings));
     },
   },
   methods: {
@@ -199,6 +241,30 @@ export default {
         if (data && data.title) {
           document.title = `Cinemajoo - ${data.title}`;
         }
+        const username = JSON.parse(localStorage.getItem("user"));
+        if (username) {
+          const ratings = JSON.parse(localStorage.getItem("ratings")) || {};
+          const watched = JSON.parse(localStorage.getItem("watched")) || {};
+          const liked = JSON.parse(localStorage.getItem("liked")) || {};
+          const watchlist = JSON.parse(localStorage.getItem("watchlist")) || {};
+          const movieId = this.$route.params.id;
+          this.userRating = ratings[username]?.[movieId] || 0;
+          this.isWatched = watched[username]?.includes(movieId) || false;
+          this.isLiked = liked[username]?.includes(movieId) || false;
+          this.isInWatchlist = watchlist[username]?.includes(movieId) || false;
+        }
+        const apiKey = "9904dcbf";
+        const omdbRes = await fetch(
+          `https://www.omdbapi.com/?t=${encodeURIComponent(
+            data.title
+          )}&apikey=${apiKey}`
+        );
+        const omdbData = await omdbRes.json();
+        this.movie.imdbRating = omdbData.imdbRating || "N/A";
+        const rotten = omdbData.Ratings?.find(
+          (r) => r.Source === "Rotten Tomatoes"
+        );
+        this.movie.rottenRating = rotten ? rotten.Value : "N/A";
       } catch (e) {
         console.error("Failed to load movie details:", e);
         this.movie = {};
@@ -208,43 +274,69 @@ export default {
     },
     toggleWatched() {
       this.isWatched = !this.isWatched;
-      this.updateMovieStatus();
+      const username = JSON.parse(localStorage.getItem("user"));
+      if (!username) return;
+      let watched = JSON.parse(localStorage.getItem("watched")) || {};
+      if (!watched[username]) watched[username] = [];
+      const movieId = this.$route.params.id;
+      const poster = this.posterUrl;
+      if (this.isWatched) {
+        if (!watched[username].includes(movieId)) {
+          watched[username].push(movieId);
+        }
+        let recently =
+          JSON.parse(localStorage.getItem("recentlyWatched")) || {};
+        if (!recently[username]) recently[username] = [];
+        recently[username] = recently[username].filter((m) => m.id !== movieId);
+        recently[username].unshift({ id: movieId, poster });
+        if (recently[username].length > 4) {
+          recently[username] = recently[username].slice(0, 4);
+        }
+        localStorage.setItem("recentlyWatched", JSON.stringify(recently));
+      } else {
+        watched[username] = watched[username].filter((id) => id !== movieId);
+        let recently =
+          JSON.parse(localStorage.getItem("recentlyWatched")) || {};
+        if (recently[username]) {
+          recently[username] = recently[username].filter(
+            (m) => m.id !== movieId
+          );
+          localStorage.setItem("recentlyWatched", JSON.stringify(recently));
+        }
+      }
+      localStorage.setItem("watched", JSON.stringify(watched));
     },
     toggleWatchlist() {
       this.isInWatchlist = !this.isInWatchlist;
-      this.updateMovieStatus();
+      const username = JSON.parse(localStorage.getItem("user"));
+      if (!username) return;
+      let watchlist = JSON.parse(localStorage.getItem("watchlist")) || {};
+      if (!watchlist[username]) watchlist[username] = [];
+      const movieId = this.$route.params.id;
+      const poster = this.posterUrl;
+      if (!watchlist[username].some((item) => item.id === movieId)) {
+        watchlist[username].push({ id: movieId, poster: poster });
+      } else {
+        watchlist[username] = watchlist[username].filter(
+          (item) => item.id !== movieId
+        );
+      }
+      localStorage.setItem("watchlist", JSON.stringify(watchlist));
     },
     toggleLike() {
       this.isLiked = !this.isLiked;
-      this.updateMovieStatus();
-    },
-    async updateMovieStatus() {
-      const id = this.$route.params.id;
-      try {
-        const response = await fetch(
-          `http://localhost:8000/api/movies/${id}/status/`,
-          {
-            method: "POST", // یا PUT بسته به API شما
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              watched: this.isWatched,
-              watchlist: this.isInWatchlist,
-              liked: this.isLiked,
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to update movie status");
-        }
-
-        const data = await response.json();
-        console.log("Status updated successfully:", data);
-      } catch (error) {
-        console.error("Error updating movie status:", error);
+      const username = JSON.parse(localStorage.getItem("user"));
+      if (!username) return;
+      let liked = JSON.parse(localStorage.getItem("liked")) || {};
+      if (!liked[username]) liked[username] = [];
+      const movieId = this.$route.params.id;
+      const poster = this.posterUrl;
+      if (!liked[username].some((item) => item.id === movieId)) {
+        liked[username].push({ id: movieId, poster: poster });
+      } else {
+        liked[username] = liked[username].filter((item) => item.id !== movieId);
       }
+      localStorage.setItem("liked", JSON.stringify(liked));
     },
   },
 };

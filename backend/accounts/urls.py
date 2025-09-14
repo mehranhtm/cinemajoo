@@ -9,6 +9,7 @@ from .views import (
     get_user_info,
     check_username_availability,
     MovieSearchView,
+    TopRatedMoviesView,
     MovieDetailView,
     MarkWatchedView
 )
@@ -23,6 +24,7 @@ urlpatterns = [
     path('user-info/', get_user_info, name='user-info'),
     path('check-username/', check_username_availability, name='check-username'),
     path('movies/search/', MovieSearchView.as_view(), name='movies-search'),
+    path('movies/top-rated/', TopRatedMoviesView.as_view(), name='movies-top-rated'),
     path('movies/<int:movie_id>/', MovieDetailView.as_view(), name='movie-detail'),
     path('movies/mark-watched/', MarkWatchedView.as_view(), name='movies-mark-watched'),
 ]

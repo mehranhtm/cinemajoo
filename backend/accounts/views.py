@@ -195,6 +195,61 @@ class MovieSearchView(APIView):
             return Response({'error': 'Search failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class TopRatedMoviesView(APIView):
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []  # Avoid JWT auth errors on public endpoint
+
+    def get(self, request):
+        """Get top 20 rated movies from TMDB API"""
+        TMDB_API_KEY = 'f1849a9d40bee7e99593d0db724f6ddb'
+        TMDB_BASE_URL = 'https://api.themoviedb.org/3'
+        
+        try:
+            # Get top rated movies from TMDB API
+            top_rated_url = f"{TMDB_BASE_URL}/movie/top_rated"
+            params = {
+                'api_key': TMDB_API_KEY,
+                'language': 'en-US',
+                'page': 1,
+                'include_adult': False
+            }
+            
+            response = requests.get(top_rated_url, params=params, timeout=30)
+            response.raise_for_status()
+            
+            data = response.json()
+            movies = data.get('results', [])
+            
+            # Format the response to match our serializer
+            formatted_movies = []
+            for movie in movies[:20]:  # Limit to 20 results
+                formatted_movie = {
+                    'id': movie.get('id'),
+                    'title': movie.get('title', ''),
+                    'poster_url': f"https://image.tmdb.org/t/p/w500{movie.get('poster_path', '')}" if movie.get('poster_path') else '',
+                    'director': '',  # TMDB doesn't provide director in top_rated results
+                    'actors': '',   # TMDB doesn't provide actors in top_rated results
+                    'summary_en': movie.get('overview', ''),
+                    'release_date': movie.get('release_date', ''),
+                    'vote_average': movie.get('vote_average', 0),
+                    'vote_count': movie.get('vote_count', 0)
+                }
+                formatted_movies.append(formatted_movie)
+            
+            # Sort by vote_average in descending order (highest first)
+            formatted_movies.sort(key=lambda x: x['vote_average'], reverse=True)
+            
+            return Response(formatted_movies, status=status.HTTP_200_OK)
+            
+        except requests.exceptions.RequestException as e:
+            # Fallback to local database if TMDB API fails
+            qs = Movie.objects.all().order_by('-vote_average')[:20]
+            return Response(MovieSerializer(qs, many=True).data, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return Response({'error': 'Failed to fetch top rated movies'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class MovieDetailView(APIView):
     permission_classes = [permissions.AllowAny]
     authentication_classes = []

@@ -6,9 +6,8 @@
         <h1 class="white--text ml-3">Cinemajoo</h1>
       </div>
       <div class="d-flex flex-row align-center navigation-section">
-        <p class="white--text mr-4">word1</p>
-        <p class="white--text mr-4">word2</p>
-        <p class="white--text mr-4">word3</p>
+        <p class="white--text mr-4 text-center" @click="$router.push('/watchlist')">Your Watch List</p>
+        <p class="white--text mr-4 text-center" @click="$router.push('/toprate')">Top 20 Movies</p>
       </div>
     </div>
     <v-spacer></v-spacer>
@@ -60,7 +59,12 @@
         <v-list v-else-if="isLoading">
           <v-list-item>
             <v-list-item-content class="d-flex align-center">
-              <v-progress-circular indeterminate size="22" color="white" class="mr-2" />
+              <v-progress-circular
+                indeterminate
+                size="22"
+                color="white"
+                class="mr-2"
+              />
             </v-list-item-content>
           </v-list-item>
         </v-list>
@@ -77,6 +81,9 @@
     </div>
     <v-btn icon @click="toggleSearch" class="search-btn">
       <v-icon color="white">mdi-magnify</v-icon>
+    </v-btn>
+    <v-btn icon @click="$router.push('/profile')" class="profile-btn">
+      <v-icon color="white">mdi-account-circle</v-icon>
     </v-btn>
     <v-btn icon @click="handleLogout" class="logout-btn">
       <v-icon color="white">mdi-logout</v-icon>
@@ -139,7 +146,6 @@ export default {
         return;
       }
       this.showDropdown = true;
-      // this.isLoading = true;
       this.searchTimeout = setTimeout(async () => {
         try {
           const response = await fetch(
@@ -148,7 +154,6 @@ export default {
             )}`
           );
           const data = await response.json();
-          // console.log("Search results:", data);
           this.searchResults = data;
         } catch (err) {
           console.error("Error fetching search results:", err);
@@ -278,5 +283,9 @@ export default {
 .search-dropdown {
   scrollbar-width: thin;
   scrollbar-color: #2c1750 #1a1a1a;
+}
+
+.profile-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 </style>
