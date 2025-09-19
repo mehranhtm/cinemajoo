@@ -1,7 +1,7 @@
 <template>
   <v-footer color="#2c1750" class="footer">
     <v-container>
-      <v-row class="text-center">
+      <v-row class="text-center d-flex justify-space-between">
         <v-col cols="12" md="4">
           <div class="d-flex flex-column align-center">
             <div class="d-flex align-center mb-3">
@@ -17,22 +17,6 @@
             </p>
           </div>
         </v-col>
-
-        <v-col cols="12" md="4">
-          <div class="d-flex flex-column align-center">
-            <h4 class="white--text mb-3">Quick Links</h4>
-            <!-- <div class="d-flex flex-column">
-              <router-link to="/login" class="footer-link">Login</router-link>
-              <router-link to="/register" class="footer-link"
-                >Register</router-link
-              >
-              <router-link to="/profile" class="footer-link"
-                >Profile</router-link
-              >
-            </div> -->
-          </div>
-        </v-col>
-
         <v-col cols="12" md="4">
           <div class="d-flex flex-column align-center">
             <h4 class="white--text mb-3">Connect With Us</h4>
@@ -50,9 +34,7 @@
           </div>
         </v-col>
       </v-row>
-
       <v-divider color="#561a7d" class="my-4"></v-divider>
-
       <v-row class="text-center">
         <v-col cols="12">
           <p class="white--text copyright">
@@ -76,12 +58,13 @@ export default {
 </script>
 
 <style scoped>
-/* .footer {
-  position: fixed;
+.footer {
+  position: sticky;
   bottom: 0;
   left: 0;
   width: 100%;
-} */
+  z-index: 1000;
+}
 
 .footer-logo {
   width: 30px;
@@ -124,7 +107,6 @@ export default {
   margin: 0;
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
   .footer-logo {
     width: 25px;
@@ -134,6 +116,10 @@ export default {
   .footer-description {
     font-size: 12px;
     max-width: 200px;
+  }
+
+  .footer {
+    position: relative;
   }
 
   .social-links {

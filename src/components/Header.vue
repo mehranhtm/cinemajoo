@@ -3,11 +3,23 @@
     <div class="d-flex flex-row align-center">
       <div class="d-flex flex-row align-center logo-section">
         <img src="../assets/images/logo1.png" alt="logo" />
-        <h1 class="white--text ml-3">Cinemajoo</h1>
+        <h1
+          class="white--text ml-3"
+          v-show="!($vuetify.breakpoint.smAndDown && showSearch)"
+        >
+          Cinemajoo
+        </h1>
       </div>
-      <div class="d-flex flex-row align-center navigation-section">
-        <p class="white--text mr-4 text-center" @click="$router.push('/watchlist')">Your Watch List</p>
-        <p class="white--text mr-4 text-center" @click="$router.push('/toprate')">Top 20 Movies</p>
+      <div
+        class="d-flex flex-row align-center navigation-section"
+        v-show="$vuetify.breakpoint.mdAndUp"
+      >
+        <p
+          class="white--text text-center caption mr-4"
+          @click="$router.push('/toprate')"
+        >
+          Top 20 Movies
+        </p>
       </div>
     </div>
     <v-spacer></v-spacer>
@@ -79,15 +91,118 @@
         </v-list>
       </v-card>
     </div>
-    <v-btn icon @click="toggleSearch" class="search-btn">
-      <v-icon color="white">mdi-magnify</v-icon>
-    </v-btn>
-    <v-btn icon @click="$router.push('/profile')" class="profile-btn">
-      <v-icon color="white">mdi-account-circle</v-icon>
-    </v-btn>
-    <v-btn icon @click="handleLogout" class="logout-btn">
-      <v-icon color="white">mdi-logout</v-icon>
-    </v-btn>
+    <v-tooltip bottom>
+      <template v-slot:activator="{ on, attrs }">
+        <v-btn
+          icon
+          @click="toggleSearch"
+          class="search-btn"
+          v-bind="attrs"
+          v-on="on"
+          v-show="!($vuetify.breakpoint.smAndDown && showSearch)"
+        >
+          <v-icon color="white">mdi-magnify</v-icon>
+        </v-btn>
+      </template>
+      <span>Search Movies</span>
+    </v-tooltip>
+    <v-menu
+      v-if="$vuetify.breakpoint.smAndDown"
+      v-model="mobileMenu"
+      offset-y
+      transition="fade-transition"
+    >
+      <template v-slot:activator="{ on, attrs }">
+        <v-btn icon class="menu-btn" v-bind="attrs" v-on="on">
+          <v-icon color="white">mdi-menu</v-icon>
+        </v-btn>
+      </template>
+      <v-list class="mobile-menu-list">
+        <v-list-item
+          @click="
+            $router.push('/toprate');
+            mobileMenu = false;
+          "
+        >
+          <v-list-item-title>Top 20 Movies</v-list-item-title>
+        </v-list-item>
+        <v-list-item
+          @click="
+            $router.push('/watchlist');
+            mobileMenu = false;
+          "
+        >
+          <v-list-item-title>Watchlist</v-list-item-title>
+        </v-list-item>
+        <v-list-item
+          @click="
+            $router.push('/profile');
+            mobileMenu = false;
+          "
+        >
+          <v-list-item-title>Profile</v-list-item-title>
+        </v-list-item>
+        <v-list-item
+          @click="
+            handleLogout();
+            mobileMenu = false;
+          "
+        >
+          <v-list-item-title>Logout</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+    <div
+      v-show="$vuetify.breakpoint.mdAndUp"
+      class="desktop-actions d-flex flex-row align-center"
+    >
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+            icon
+            @click="$router.push('/watchlist')"
+            v-bind="attrs"
+            v-on="on"
+            class="watchlist-btn"
+          >
+            <img
+              style="width: inherit; filter: brightness(0) invert(1)"
+              src="../assets/images/watchlist.svg"
+              alt="watchlist"
+            />
+          </v-btn>
+        </template>
+        <span>Your Watchlist</span>
+      </v-tooltip>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+            icon
+            @click="$router.push('/profile')"
+            class="profile-btn"
+            v-bind="attrs"
+            v-on="on"
+          >
+            <v-icon color="white">mdi-account-circle</v-icon>
+          </v-btn>
+        </template>
+        <span>Profile</span>
+      </v-tooltip>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+            icon
+            @click="handleLogout"
+            class="logout-btn"
+            v-bind="attrs"
+            v-on="on"
+          >
+            <v-icon color="white">mdi-logout</v-icon>
+          </v-btn>
+        </template>
+        <span>Logout</span>
+      </v-tooltip>
+    </div>
   </v-app-bar>
 </template>
 
@@ -102,6 +217,7 @@ export default {
       showDropdown: false,
       searchTimeout: null,
       isLoading: false,
+      mobileMenu: false,
     };
   },
   methods: {
@@ -208,6 +324,10 @@ export default {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+.menu-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 .logout-btn {
   color: white !important;
   width: 100%;
@@ -219,7 +339,7 @@ export default {
 }
 
 .search-field {
-  min-width: 300px;
+  min-width: 100px;
 }
 
 .search-dropdown {
@@ -287,5 +407,34 @@ export default {
 
 .profile-btn:hover {
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+.watchlist-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.watchlist-btn >>> .v-btn__content {
+  width: 30px !important;
+  height: 30px !important;
+}
+
+.mobile-menu-list {
+  background-color: #1a0c33 !important;
+  color: white !important;
+}
+.mobile-menu-list .v-list-item__title {
+  color: white !important;
+}
+@media (max-width: 768px) {
+  .header img {
+    display: none;
+  }
+  .header h1 {
+    font-size: 20px !important;
+    margin-left: 0 !important;
+  }
+  .navigation-section,
+  .desktop-actions {
+    display: none !important;
+  }
 }
 </style>

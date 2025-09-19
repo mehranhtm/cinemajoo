@@ -1,7 +1,7 @@
 <template>
   <v-container class="d-flex justify-center">
     <v-card
-      class="signin-card rounded pa-4 d-flex flex-row mt-14"
+      class="signin-card rounded pa-4 d-flex flex-md-row flex-column mt-14"
       color="#2c1750"
     >
       <div class="pic-left">
@@ -51,7 +51,11 @@
             >
               Login
             </v-btn>
-            <p class="white--text mt-4" style="letter-spacing: 3px">
+            <p
+              id="login-link"
+              class="white--text mt-4"
+              style="letter-spacing: 3px"
+            >
               IF YOU DON'T HAVE AN ACCOUNT,
               <router-link
                 class="text-decoration-none text-primary font-weight-bold"
@@ -167,5 +171,23 @@ export default {
 
 .title {
   gap: 10px;
+}
+@media (max-width: 768px) {
+  .signin-card {
+    width: 100%;
+    margin-top: 0 !important;
+  }
+  .pic-left {
+    width: 100%;
+  }
+  .title h1 {
+    font-size: 2rem;
+  }
+  .right {
+    width: 100%;
+  }
+  #login-link {
+    font-size: 11px;
+  }
 }
 </style>

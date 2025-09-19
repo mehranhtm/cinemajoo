@@ -184,7 +184,7 @@ export default {
   font-size: 1.1em;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .movie-card {
     margin-bottom: 16px;
   }

@@ -13,153 +13,175 @@
         indeterminate
       ></v-progress-circular>
     </div>
-    <v-container
-      v-else
-      class="d-flex flex-row text-break"
-      style="gap: 15px; max-width: 91%"
-    >
-      <div class="left d-flex flex-column">
-        <div class="poster">
-          <img :src="posterUrl" alt="Poster" />
-        </div>
-        <div class="d-flex flex-row justify-space-around">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                icon
-                :color="isWatched ? 'success' : 'grey'"
-                class="ma-2"
-                v-bind="attrs"
-                v-on="on"
-                @click="toggleWatched"
-              >
-                <v-icon>
-                  {{
-                    isWatched ? "mdi-check-circle" : "mdi-check-circle-outline"
-                  }}</v-icon
+    <v-container v-else fluid class="text-break" style="max-width: 91%">
+      <v-row class="movie-grid" align="start" justify="space-between" dense>
+        <!-- Left: Poster + Actions -->
+        <v-col
+          cols="12"
+          md="3"
+          class="left d-flex flex-column align-center align-md-start mb-4 mb-md-0"
+        >
+          <div class="poster">
+            <img :src="posterUrl" alt="Poster" />
+          </div>
+          <div
+            class="d-flex flex-row justify-center justify-md-space-around mt-3"
+            style="width: 100%"
+          >
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  icon
+                  :color="isWatched ? 'success' : 'grey'"
+                  class="ma-2"
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="toggleWatched"
                 >
-              </v-btn>
-            </template>
-            <span>{{ isWatched ? "Watched" : "Mark as watched" }}</span>
-          </v-tooltip>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                icon
-                :color="isInWatchlist ? 'primary' : 'grey'"
-                class="ma-2"
-                v-bind="attrs"
-                v-on="on"
-                @click="toggleWatchlist"
+                  <v-icon>
+                    {{
+                      isWatched
+                        ? "mdi-check-circle"
+                        : "mdi-check-circle-outline"
+                    }}
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>{{ isWatched ? "Watched" : "Mark as watched" }}</span>
+            </v-tooltip>
+
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  icon
+                  :color="isInWatchlist ? 'primary' : 'grey'"
+                  class="ma-2"
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="toggleWatchlist"
+                >
+                  <v-icon>{{
+                    isInWatchlist ? "mdi-bookmark" : "mdi-bookmark-outline"
+                  }}</v-icon>
+                </v-btn>
+              </template>
+              <span>{{
+                isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"
+              }}</span>
+            </v-tooltip>
+
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  icon
+                  :color="isLiked ? 'red' : 'grey'"
+                  class="ma-2"
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="toggleLike"
+                >
+                  <v-icon>{{
+                    isLiked ? "mdi-heart" : "mdi-heart-outline"
+                  }}</v-icon>
+                </v-btn>
+              </template>
+              <span>{{ isLiked ? "Unlike" : "Like" }}</span>
+            </v-tooltip>
+          </div>
+        </v-col>
+
+        <!-- Middle: Movie Info -->
+        <v-col cols="12" md="5" class="mid d-flex flex-column">
+          <div v-if="hasMovie">
+            <h1 class="white--text">{{ movie.title }}</h1>
+            <p class="grey--text mt-2">{{ releaseYear }}</p>
+            <p class="white--text mt-2">Director: {{ movie.director }}</p>
+            <p class="grey--text mt-2 text-break">{{ movie.summary_en }}</p>
+            <div class="d-flex flex-row flex-wrap mt-2" v-if="actorList.length">
+              <v-chip
+                v-for="actor in actorList"
+                :key="actor"
+                small
+                class="ma-1"
+                outlined
+                color="white"
               >
-                <v-icon>{{
-                  isInWatchlist ? "mdi-bookmark" : "mdi-bookmark-outline"
-                }}</v-icon>
-              </v-btn>
-            </template>
-            <span>{{
-              isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist"
-            }}</span>
-          </v-tooltip>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                icon
-                :color="isLiked ? 'red' : 'grey'"
-                class="ma-2"
-                v-bind="attrs"
-                v-on="on"
-                @click="toggleLike"
-              >
-                <v-icon>{{
-                  isLiked ? "mdi-heart" : "mdi-heart-outline"
-                }}</v-icon>
-              </v-btn>
-            </template>
-            <span>{{ isLiked ? "Unlike" : "Like" }}</span>
-          </v-tooltip>
-        </div>
-      </div>
-      <div class="mid d-flex flex-column" v-if="hasMovie">
-        <h1 class="white--text">{{ movie.title }}</h1>
-        <p class="grey--text mt-2">{{ releaseYear }}</p>
-        <p class="white--text mt-2">Director: {{ movie.director }}</p>
-        <p class="grey--text mt-2 text-break">{{ movie.summary_en }}</p>
-        <div class="d-flex flex-row flex-wrap mt-2" v-if="actorList.length">
-          <v-chip
-            v-for="actor in actorList"
-            :key="actor"
-            small
-            class="ma-1"
-            outlined
-            color="white"
+                {{ actor }}
+              </v-chip>
+            </div>
+          </div>
+        </v-col>
+
+        <!-- Right: Ratings + User Rating -->
+        <v-col cols="12" md="4" class="right d-flex flex-column">
+          <div
+            class="d-flex flex-row justify-center align-center"
+            style="gap: 35px"
+            v-if="hasMovie"
           >
-            {{ actor }}
-          </v-chip>
-        </div>
-      </div>
-      <div class="right d-flex flex-column" style="width: 50%">
-        <div
-          class="d-flex flex-row justify-center align-center"
-          style="gap: 35px"
-          v-if="hasMovie"
-        >
-          <div class="d-flex flex-column align-center mb-4" style="gap: 8px">
-            <v-img
-              src="../assets/images/tmdb.svg"
-              alt="TMDB"
-              height="40"
-              width="40"
-              style="border-radius: 100%"
-            ></v-img>
-            <p class="white--text text-center ma-0">{{ movie.vote_average.toFixed(1) }}</p>
+            <div class="d-flex flex-column align-center mb-4" style="gap: 8px">
+              <v-img
+                src="../assets/images/tmdb.svg"
+                alt="TMDB"
+                height="40"
+                width="40"
+                style="border-radius: 100%"
+              ></v-img>
+              <p class="white--text text-center ma-0">
+                {{ movie.vote_average.toFixed(1) }}
+              </p>
+            </div>
+            <div class="d-flex flex-column align-center mb-4" style="gap: 8px">
+              <v-img
+                src="../assets/images/imdb-logo.svg"
+                alt="IMDB"
+                width="40"
+                height="40"
+                style="border-radius: 100%"
+              ></v-img>
+              <p class="white--text text-center ma-0">
+                {{ movie.imdbRating || "N/A" }}
+              </p>
+            </div>
+            <div class="d-flex flex-column align-center mb-4" style="gap: 8px">
+              <v-img
+                src="../assets/images/Rotten_Tomatoes.svg.png"
+                alt="Rotten Tomatoes"
+                width="40"
+                height="40"
+                style="border-radius: 100%"
+              ></v-img>
+              <p class="white--text text-center ma-0">
+                {{ movie.rottenRating || "N/A" }}
+              </p>
+            </div>
           </div>
-          <div class="d-flex flex-column align-center mb-4" style="gap: 8px">
-            <v-img
-              src="../assets/images/imdb-logo.svg"
-              alt="IMDB"
-              width="40"
-              height="40"
-              style="border-radius: 100%"
-            ></v-img>
-            <p class="white--text text-center ma-0">
-              {{ movie.imdbRating || "N/A" }}
-            </p>
+          <v-divider color="#561a7d"></v-divider>
+          <div v-if="!isWatched" class="text-center pa-4">
+            <span class="white--text mr-2"
+              >You haven't watched this movie yet.</span
+            >
           </div>
-          <div class="d-flex flex-column align-center mb-4" style="gap: 8px">
-            <v-img
-              src="../assets/images/Rotten_Tomatoes.svg.png"
-              alt="Rotten Tomatoes"
-              width="40"
-              height="40"
-              style="border-radius: 100%"
-            ></v-img>
-            <p class="white--text text-center ma-0">
-              {{ movie.rottenRating || "N/A" }}
-            </p>
-          </div>
-        </div>
-        <v-divider color="#561a7d"></v-divider>
-        <div v-if="!isWatched" class="text-center pa-4">
-          <span class="white--text mr-2"
-            >You haven't watched this movie yet.</span
+          <div
+            v-if="isWatched"
+            class="d-flex flex-column align-center mt-4 text-center"
           >
-        </div>
-        <div
-          v-if="isWatched"
-          class="d-flex flex-column align-center mt-4 text-center"
-        >
-          <span class="white--text mr-2">Your rating</span>
-          <v-rating
-            v-model="userRating"
-            :length="10"
-            color="amber"
-            background-color="grey darken-2"
-            dense
-          />
-          <span class="grey--text ml-2">{{ userRating || 0 }}/10</span>
-        </div>
-      </div>
+            <span class="white--text mr-2">Your rating</span>
+            <v-rating
+              v-model="userRating"
+              :length="10"
+              color="amber"
+              background-color="grey darken-2"
+              dense
+            />
+            <span class="grey--text ml-2">{{ userRating || 0 }}/10</span>
+          </div>
+        </v-col>
+      </v-row>
+    </v-container>
+
+    <v-container v-if="hasMovie" style="max-width: 91%">
+      <Comments :movieId="$route.params.id" />
     </v-container>
     <Footer />
   </div>
@@ -168,12 +190,14 @@
 <script>
 import Header from "../components/Header.vue";
 import Footer from "../components/Footer.vue";
+import Comments from "../components/Comments.vue";
 
 export default {
   name: "MovieDetail",
   components: {
     Header,
     Footer,
+    Comments,
   },
   data() {
     return {
@@ -343,18 +367,9 @@ export default {
 </script>
 
 <style scoped>
-.poster {
-  width: 300px;
-  height: 400px;
-  border: 3px solid #561a7d;
-  border-radius: 8px;
-}
-
 .poster img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 8px;
+  border-radius: 8px;border: 3px solid #561a7d;
 }
 
 .mid h1 {
@@ -366,5 +381,11 @@ export default {
   border-radius: 8px;
   padding: 10px;
   height: fit-content;
+}
+
+@media (max-width: 959px) {
+  .poster {
+    max-width: 220px;
+  }
 }
 </style>
